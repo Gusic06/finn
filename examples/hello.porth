@@ -1,0 +1,5 @@
+main :: proc // create lambda procedure and push into main
+    "Hello, World!" print
+end
+
+main() // call main

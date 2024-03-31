@@ -1,0 +1,29 @@
+expression -> literal
+            | binary
+            | unary
+            | grouping
+            | wrapping
+
+literal    -> NUMBER
+            | STRING
+            | "true"
+            | "false"
+            | "nil"
+
+ident      -> [A-Za-z0-9]
+
+grouping   -> "(" expression ")"
+wrapping   -> "|" ident "|"
+binary     -> expression expression operator
+operator   -> "=="
+            | "!="
+            | "<"
+            | "<="
+            | ">"
+            | ">="
+            | "+"
+            | "+="
+            | "-"
+            | "-="
+            | "*"
+            | "/"

@@ -1,0 +1,40 @@
+// Finn Standard Library: Array
+// Created on 23/3/24
+
+// params:
+//   size:       int    (the size of the array, this can change if the array is dynamic)
+//   is_dynamic: bool   (determines whether or not the array is dynamic)
+//   contents:   @any[] (contents of the array)
+StaticArray :: struct 
+    size       int
+    is_dynamic bool
+    contents   @any[]
+end
+
+// params:
+//   size:     int    (size of the array, this can (and probably will) change)
+//   contents: @any[] (contents of the array)
+DynamicArray :: struct
+    size     int
+    contents @any[]
+end
+
+// param: unwrapped StaticArray object
+init_static_array :: proc 
+    array :: ... // grab array object from the top of the object stack
+    array!->size 1 =
+    array->contents[0] nil =
+    |array| // return initialised array
+end
+
+init_dynamic_array :: proc 
+    "TODO: Not Implemented" todo
+end
+
+append :: proc
+    "TODO: Not Implemented" todo
+end
+
+pop :: proc
+    "TODO: Not Implemented" todo
+end

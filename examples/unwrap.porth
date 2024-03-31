@@ -1,0 +1,13 @@
+guh :: proc // creating lambda procedure and pushing it into 'guh'
+    "Hello, World!" print
+end
+
+guh()
+
+buh :: |guh| // unwrapping 'guh' and pushing contents into 'buh'
+buh() // call 'buh'
+
+|buh| // unwrap 'buh' and push the procedure to the stack
+
+wuh :: ... // get the first object from the stack and push it to 'wuh'
+wuh() // call 'wuh'
