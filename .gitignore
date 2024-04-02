@@ -4,3 +4,4 @@
 .__pycache__
 .finn.egg-info
 .fasm/FASMW.INI
+lib/__pycache__
