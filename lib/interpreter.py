@@ -1,15 +1,17 @@
+from typing import Any, Dict, List, Literal, Tuple, Type, Union
+
 from .tokentype import Token, TokenType
 from .vm import VM
 
 class Interpreter:
 
-    def __init__(self, tokens: list[Token]) -> None:
+    def __init__(self, tokens: List[Token]) -> None:
         self.vm: VM = VM()
-        self.tokens: list[Token] = tokens
+        self.tokens: List[Token] = tokens
         self.stack: list = []
-        self.call_stack: list[hex] = []
+        self.call_stack: List[str] = []
 
-        self.variables: dict[str, any] = {}
+        self.variables: Dict[str, Any] = {}
 
         self.index: int = 0
         self.end_tolerance: int = 0
@@ -21,22 +23,22 @@ class Interpreter:
 
         self.in_proc: bool = False
         self.proc_name: str = ""
-        self.proc_contents: list[Token] = []
-        self.proc_buffer: list[list[Token]] = []
+        self.proc_contents: List[Token] = []
+        self.proc_buffer: List[List[Union[str,List[Token]]]] = []
         self.buffer_index: int = 0
-        self.procs: dict[str, list[Token]] = {}
+        self.procs: Dict[str, List[Token]] = {}
 
         self.in_struct: bool = False
         self.struct_name: str = ""
-        self.struct_contents: dict[str, Token] = {}
-        self.structs: dict[str, dict[str, tuple[any, Token]]] = {}
+        self.struct_contents: Dict[str, Tuple[Any,TokenType]] = {}
+        self.structs: Dict[str, Dict[str, Tuple[Any, TokenType]]] = {}
 
         self.in_macro: bool = False
         self.macro_name: str = ""
         self.macro_contents: list[Token] = []
         self.macros: dict[str, list[Token]] = {}
 
-        self.type_table: dict[object, Token] = {
+        self.type_table: Dict[Type, TokenType] = {
             int  : TokenType.INT,
             str  : TokenType.STRING,
             bool : TokenType.BOOL
@@ -44,7 +46,7 @@ class Interpreter:
 
     def print_error(self, error: str) -> None:
         print(error)
-        self.tokens = [TokenType.EOF]
+        self.tokens = [Token(TokenType.EOF, None, TokenType.OPERAND, (0, 0), "")]
 
     def at_end(self) -> bool:
         return self.index >= len(self.tokens)
@@ -57,7 +59,7 @@ class Interpreter:
     def peek(self) -> Token:
         return self.tokens[self.index]
     
-    def interpret_object(self, obj: object) -> None:
+    def interpret_object(self, obj: List[Token]) -> None:
         current_branch = self.tokens
         current_index = self.index
         self.tokens = obj
@@ -74,7 +76,7 @@ class Interpreter:
 
             if self.in_macro:
                 if self.token._type in [TokenType.PROC, TokenType.MACRO, TokenType.STRUCT]:
-                    self.print_error(f"{self.token.filename}:{self.token.position[0]}:{self.token.position[1]}: Unable to have object definition inside macro\n\nIllegal Example:\n--------------------\n[macro_name] :: macro\n    [{self.token._type.lower()}_name] :: {self.token._type.lower()}\n        [{self.token._type.lower()}_contents]\n    end\n    [macro_contents]\nend\n--------------------\n\nLegal Example:\n--------------------\n[{self.token._type.lower()}_name] :: {self.token._type.lower()}\n    [{self.token._type.lower()}_contents]\nend\n\n[macro_name] :: macro\n    [macro_contents]\nend\n--------------------")
+                    self.print_error(f"{self.token.filename}:{self.token.position[0]}:{self.token.position[1]}: Unable to have object definition inside macro\n\nIllegal Example:\n--------------------\n[macro_name] :: macro\n    [{self.token._type.name.lower()}_name] :: {self.token._type.name.lower()}\n        [{self.token._type.name.lower()}_contents]\n    end\n    [macro_contents]\nend\n--------------------\n\nLegal Example:\n--------------------\n[{self.token._type.name.lower()}_name] :: {self.token._type.name.lower()}\n    [{self.token._type.name.lower()}_contents]\nend\n\n[macro_name] :: macro\n    [macro_contents]\nend\n--------------------")
 
                 if self.end_tolerance == 0 and self.token._type == TokenType.END:
                     self.fall_through = False
@@ -116,7 +118,7 @@ class Interpreter:
                     return
                 if self.token._type != TokenType.END:
                     self.struct_contents[self.token.value] = (None, self.tokens[self.index]._type)
-                    self.index + 1
+                    self.index =+ 1
                 else:
                     self.fall_through = False
                 return
@@ -147,8 +149,8 @@ class Interpreter:
             self.in_proc = False
             self.proc_name = ""
             if len(self.proc_buffer) > 0:
-                self.proc_name = self.proc_buffer[self.buffer_index - 1][0]
-                self.proc_contents = self.proc_buffer[self.buffer_index - 1][1]
+                self.proc_name = self.proc_buffer[self.buffer_index - 1][0] # type: ignore
+                self.proc_contents = self.proc_buffer[self.buffer_index - 1][1] # type: ignore
                 self.proc_buffer.pop()
                 self.buffer_index -= 1
                 self.in_proc = True
@@ -163,7 +165,7 @@ class Interpreter:
 
         if self.in_struct:
             try:
-                del self.struct_contents[None] # stupid hack
+                del self.struct_contents[None] # type: ignore | stupid hack
             except KeyError:
                 pass #fuck you
             self.structs[self.struct_name] = self.struct_contents

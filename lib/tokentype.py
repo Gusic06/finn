@@ -1,5 +1,7 @@
+from enum import Enum
+from typing import Any
 
-class TokenType:
+class TokenType(Enum):
 
     PUSH = "PUSH"
 
@@ -91,14 +93,14 @@ class TokenType:
 
 class Token:
 
-    def __init__(self, _type: TokenType, value: any, value_type: TokenType, position: tuple[int, int], filename: str) -> None:
+    def __init__(self, _type: TokenType, value: Any, value_type: TokenType, position: tuple[int, int], filename: str) -> None:
         self._type = _type
         self.value = value
         self.value_type = value_type
         self.position = position
         self.filename = filename
 
-    def pprint(self) -> str:
+    def pprint(self):
         padding_1 = 11 - len((str(self._type)))
         padding_2 = 3 - len(str(self._type))
 
