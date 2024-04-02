@@ -1,0 +1,6 @@
+setup.py
+finn.egg-info/PKG-INFO
+finn.egg-info/SOURCES.txt
+finn.egg-info/dependency_links.txt
+finn.egg-info/entry_points.txt
+finn.egg-info/top_level.txt
