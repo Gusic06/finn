@@ -1,0 +1,6 @@
+.lib/__pycache__
+.std/*
+..vscode
+.__pycache__
+.finn.egg-info
+.fasm/FASMW.INI
