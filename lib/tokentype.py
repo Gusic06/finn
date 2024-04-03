@@ -1,5 +1,5 @@
-from enum import Enum
 from typing import Any
+from enum import Enum
 
 class TokenType(Enum):
 
@@ -41,6 +41,8 @@ class TokenType(Enum):
     BANG = "BANG"
     BANG_EQUALS = "BANG_EQUALS"
 
+    COLON = "COLON"
+
     OBJECT_ASSIGN = "OBJECT_ASSIGN"
     GRAB_OBJECT = "GRAB_OBJECT"
 
@@ -55,6 +57,13 @@ class TokenType(Enum):
     ARROW = "ARROW"
 
     MACRO = "MACRO"
+    ENUM = "ENUM"
+
+    RETURN = "RETURN"
+
+    AND = "AND"
+    OR = "OR"
+    NOT = "NOT"
 
     EXIT = "EXIT"
     IF = "IF"
@@ -62,26 +71,21 @@ class TokenType(Enum):
     END = "END"
     PASS = "PASS"
     INCLUDE = "INCLUDE"
+
     PROC = "PROC"
-    IN = "IN"
     STRUCT = "STRUCT"
-    CALL_STRUCT = "CALL_STRUCT"
+
     PRINT = "PRINT"
     DUP = "DUP"
     SYSCALL = "SYSCALL"
     CALL = "CALL"
     CALL_VAR = "CALL_VAR"
-    CALL_LIKE = "CALL_LIKE"
-    DEREF = "DEREF"
-    CAST = "CAST"
-    PTR = "PTR"
-    CAST_PTR = "CAST_PTR"
+
     INT = "INT"
     BOOL = "BOOL"
     SIZEOF = "SIZEOF"
     DROP = "DROP"
     SWAP = "SWAP"
-    REG = "REG"
 
     OPERAND = "OPERAND"
     INTRINSIC = "INTRINSIC"
