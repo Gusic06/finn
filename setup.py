@@ -7,6 +7,6 @@ setup(
     install_requires=[],
     entry_points="""
     [console_scripts]
-    finn=porth:porth
+    finn=finn:finn
     """
 )
