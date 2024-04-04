@@ -1,0 +1,32 @@
+Movie :: struct 
+    name: str
+    rating: int
+end
+
+Movie :: impl 
+    new :: proc 
+        movie :: Movie
+        movie.name "" =
+        movie.rating -1 =
+        |movie| return
+    end
+
+    init :: proc 
+        self.name 1# =
+        self.rating 2# =
+    end
+
+    get_name :: proc 
+        self.name return
+    end
+
+    get_rating :: proc
+        self.rating return
+    end
+end
+
+movie :: Movie.new()
+movie.init("No Country for Old Men" 18)
+
+movie.get_name() print // "No Country for Old Men"
+movie.get_rating() print // 18
