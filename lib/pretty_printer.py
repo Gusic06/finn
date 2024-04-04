@@ -1,4 +1,4 @@
-from .expr import PUSH, BINOP, COMP, CALL, VARIABLE, PRINT, OP, IF, THEN, ELSE, VARIABLE_DECL, PROC, NAME, BLOCK, INCLUDE, STRUCT, AND, OR, NOT, EXIT, MEMBER, ARGS, ARG, RETURN, OBJECT
+from .expr import PUSH, BINOP, COMP, CALL, VARIABLE, PRINT, OP, IF, THEN, ELSE, VARIABLE_DECL, PROC, NAME, BLOCK, INCLUDE, STRUCT, AND, OR, NOT, EXIT, MEMBER, ARGS, ARG, RETURN, OBJECT, IMPL
 from .tokentype import Token
 
 
@@ -13,6 +13,13 @@ class PrettyPrinter:
             self.tree += f"{' ' * self.indent}PRINT(\n"
             self.indent += 2
             self.construct_tree(expr.visit())
+            self.indent -= 2
+            self.tree += f"{' ' * self.indent})\n"
+
+        elif isinstance(expr, IMPL):
+            self.tree += f"{' ' * self.indent}IMPL(\n"
+            self.indent += 2
+            [self.construct_tree(expr) for expr in expr.visit()]
             self.indent -= 2
             self.tree += f"{' ' * self.indent})\n"
 
