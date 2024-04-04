@@ -18,6 +18,15 @@ class RETURN(Expr):
 
     def visit(self) -> Expr:
         return self.expr
+    
+class IMPL(Expr):
+
+    def __init__(self, name: Expr, *procs: list[Expr]) -> None:
+        self.name: Expr = name
+        self.procs: list[Expr] = procs
+
+    def visit(self) -> any:
+        return self.name, *self.procs
 
 class ARGS(Expr):
 
