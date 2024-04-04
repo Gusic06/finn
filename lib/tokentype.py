@@ -1,4 +1,3 @@
-from typing import Any
 from enum import Enum
 
 class TokenType(Enum):
@@ -56,6 +55,7 @@ class TokenType(Enum):
     ADDRESS = "ADDRESS"
     ARROW = "ARROW"
 
+    IMPL = "IMPL"
     MACRO = "MACRO"
     ENUM = "ENUM"
 
@@ -93,18 +93,19 @@ class TokenType(Enum):
     NUMBER = "NUMBER"
     IDENTIFIER = "IDENTIFIER"
 
+    NEWLINE = "NEWLINE"
     EOF = "EOF"
 
 class Token:
 
-    def __init__(self, _type: TokenType, value: Any, value_type: TokenType, position: tuple[int, int], filename: str) -> None:
+    def __init__(self, _type: TokenType, value: any, value_type: TokenType, position: tuple[int, int], filename: str) -> None:
         self._type = _type
         self.value = value
         self.value_type = value_type
         self.position = position
         self.filename = filename
 
-    def pprint(self):
+    def pprint(self) -> str:
         padding_1 = 11 - len((str(self._type)))
         padding_2 = 3 - len(str(self._type))
 
