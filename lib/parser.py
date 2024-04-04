@@ -4,8 +4,8 @@ from .expr import (
     OP, IF, THEN, ELSE, VARIABLE, 
     VARIABLE_DECL, PROC, ARGS, ARG, 
     NAME, BLOCK, INCLUDE, STRUCT, ENUM, 
-    MEMBER, AND, OR, NOT, EXIT, 
-    OBJECT, RETURN, RETURNS, Expr
+    MEMBER, AND, OR, NOT, EXIT, IMPL,
+    OBJECT, RETURN, Expr
 )
 
 class Parser:
@@ -35,6 +35,38 @@ class Parser:
     
     def at_end(self) -> bool:
         return self.tokens[self.index]._type == TokenType.EOF
+    
+    def parse_identifier(self) -> Expr:
+        fall_through: bool = True
+        statements = []
+        self.index -= 1 # stupid hack
+
+        while fall_through and not self.at_end():
+            token: Token = self.advance()
+
+            match token._type:
+
+                case TokenType.PUSH:
+                    statements.append(PUSH(token))
+
+                case TokenType.DOT:
+                    if len(statements) == 0:
+                        self.report_error("todo")
+    
+                    root = statements.pop()
+                    member = self.advance()
+
+                    statements.append(MEMBER(root, PUSH(member)))
+
+                case TokenType.L_PAREN:
+                    function_name = statements.pop()
+                    args = self.capture_args()
+                    statements.append(CALL(function_name, ARGS(args)))
+
+                case _:
+                    fall_through = False
+        
+        return statements.pop()
 
     def capture_args(self) -> None:
         args = []
@@ -105,6 +137,9 @@ class Parser:
         
         return contents
 
+    def construct_enum(self) -> None:
+        ...
+
     def construct_struct(self) -> None:
         type_table = {}
         fall_through: bool = True
@@ -127,16 +162,44 @@ class Parser:
                             data_type = STRUCT(self.tokens[self.index - 2], self.construct_struct())
 
                     type_table[name.value] = data_type
+                
+                case TokenType.NEWLINE:
+                    pass
 
                 case TokenType.END:
                     fall_through = False
 
                 case _:
-                    if token._type not in [TokenType.PUSH, TokenType.COLON, TokenType.INT, TokenType.STRING, TokenType.BOOL, TokenType.PROC, TokenType.STRUCT]:
+                    if token._type not in [TokenType.PUSH, TokenType.COLON, TokenType.INT, TokenType.STRING, TokenType.BOOL, TokenType.PROC, TokenType.STRUCT, TokenType.NEWLINE]:
                         print(f"{token.filename}:{token.position[0]}:{token.position[1]}: Invalid struct syntax, found \"{token._type}\" inside struct definition")
                         exit(1)
 
         return type_table
+
+    def construct_impl(self) -> IMPL:
+        procs: list[PROC] = []
+        stack: list[Expr] = []
+        fall_through: bool = True
+        name: PUSH = self.statements.pop()
+        while fall_through and not self.at_end():
+            token: Token = self.advance()
+
+            match token._type:
+
+                case TokenType.PUSH:
+                    stack.append(PUSH(token))
+                
+                case TokenType.END:
+                    fall_through = False
+
+                case TokenType.OBJECT_ASSIGN:
+                    if self.advance()._type == TokenType.PROC:
+                        procs.append(PROC(NAME(stack.pop()), BLOCK(self.construct_proc())))
+                        self.advance()
+                    else:
+                        self.report_error("Cannot have anything but a proc definition inside of an impl block")
+        
+        return IMPL(NAME(name), *procs)
 
     def construct_object(self) -> Expr:
         name: PUSH = self.statements.pop()
@@ -153,12 +216,16 @@ class Parser:
             case TokenType.ENUM:
                 return ENUM(NAME(name), self.construct_enum())
 
-            case _:
-                return OBJECT(NAME(name), NAME(PUSH(token)))
+            case TokenType.IMPL:
+                self.statements.append(name)
+                return self.construct_impl()
+            
+            case TokenType.PUSH:
+                if token.value_type == TokenType.IDENTIFIER:
+                    return OBJECT(NAME(name), NAME(self.parse_identifier()))
 
     def parse_token(self, statements) -> None:
         token: Token = self.advance()
-
         match token._type:
 
             case TokenType.EXIT:
@@ -191,10 +258,10 @@ class Parser:
                 ...
 
             case TokenType.DOT:
-                if len(self.statements) == 0:
+                if len(statements) == 0:
                     self.report_error("todo")
 
-                root = self.statements.pop()
+                root = statements.pop()
                 member = self.advance()
 
                 statements.append(MEMBER(root, PUSH(member)))
