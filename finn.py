@@ -31,7 +31,7 @@ def finn() -> None:
         if arg == "-i":
             interpret = True
 
-        if arg[-6:] == ".porth":
+        if arg[-6:] == ".porth" or arg[-5:] == ".finn":
             filename = arg
 
         if arg == "-repl":
