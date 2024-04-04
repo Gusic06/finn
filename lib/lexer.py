@@ -44,72 +44,77 @@ class Lexer:
                 ...
 
             case "(":
-                self.create_token(TokenType.L_PAREN, "(", TokenType.OPERAND)
+                self.create_token(TokenType.L_PAREN, None, TokenType.OPERAND)
 
             case ")":
-                self.create_token(TokenType.R_PAREN, ")", TokenType.OPERAND)
+                self.create_token(TokenType.R_PAREN, None, TokenType.OPERAND)
 
             case "{":
-                self.create_token(TokenType.L_BRACE, "{", TokenType.OPERAND)
+                self.create_token(TokenType.L_BRACE, None, TokenType.OPERAND)
             
             case "}":
-                self.create_token(TokenType.R_BRACE, "}", TokenType.OPERAND)
+                self.create_token(TokenType.R_BRACE, None, TokenType.OPERAND)
 
             case ",":
-                self.create_token(TokenType.COMMA, ",", TokenType.OPERAND)
+                self.create_token(TokenType.COMMA, None, TokenType.OPERAND)
 
             case ".":
                 if self.match("."):
                     if self.match("."):
-                        self.create_token(TokenType.GRAB_OBJECT, "...", TokenType.OPERAND)
+                        self.create_token(TokenType.GRAB_OBJECT, None, TokenType.OPERAND)
                     else:
-                        self.error("Found invalid character \"..\"")
+                        ...
                 else:
-                    self.create_token(TokenType.DOT, ".", TokenType.OPERAND)
+                    self.create_token(TokenType.DOT, None, TokenType.OPERAND)
 
             case ":":
                 if self.match(":"):
-                    self.create_token(TokenType.OBJECT_ASSIGN, "::", TokenType.OPERAND)
+                    self.create_token(TokenType.OBJECT_ASSIGN, None, TokenType.OPERAND)
                 else:
                     self.create_token(TokenType.COLON, ":", TokenType.OPERAND)
 
             case "#":
-                self.create_token(TokenType.HASH, "#", TokenType.OPERAND)
+                self.create_token(TokenType.HASH, None, TokenType.OPERAND)
 
             case "|":
-                self.create_token(TokenType.PIPE, "|", TokenType.OPERAND)
+                if self.match(">"):
+                    self.create_token(TokenType.R_BIND, None, TokenType.OPERAND)
+                else:
+                    self.create_token(TokenType.PIPE, None, TokenType.OPERAND)
 
             case "-":
                 if self.is_digit(self.peek()):
                     self.number(negative=True)
-                if self.match("="):
-                    self.create_token(TokenType.MINUS_EQUALS, "-=", TokenType.OPERAND)
+                elif self.match("="):
+                    self.create_token(TokenType.MINUS_EQUALS, None, TokenType.OPERAND)
                 elif self.match("-"):
-                    self.create_token(TokenType.MINUS_MINUS, "--", TokenType.OPERAND)
+                    self.create_token(TokenType.MINUS_MINUS, None, TokenType.OPERAND)
+                elif self.match(">"):
+                    self.create_token(TokenType.ARROW, None, TokenType.OPERAND)
                 else:
                     self.create_token(TokenType.MINUS, "-", TokenType.OPERAND)
 
             case "+":
                 if self.match("="):
-                    self.create_token(TokenType.PLUS_EQUALS, "+=", TokenType.OPERAND)
+                    self.create_token(TokenType.PLUS_EQUALS, None, TokenType.OPERAND)
                 elif self.match("+"):
-                    self.create_token(TokenType.PLUS_PLUS, "++", TokenType.OPERAND)
+                    self.create_token(TokenType.PLUS_PLUS, None, TokenType.OPERAND)
                 else:
                     self.create_token(TokenType.PLUS, "+", TokenType.OPERAND)
 
             case "*":
                 if self.match("="):
-                    self.create_token(TokenType.STAR_EQUALS, "*=", TokenType.OPERAND)
+                    self.create_token(TokenType.STAR_EQUALS, None, TokenType.OPERAND)
                 elif self.match("*"):
-                    self.create_token(TokenType.STAR_STAR, "**", TokenType.OPERAND)
+                    self.create_token(TokenType.STAR_STAR, None, TokenType.OPERAND)
                 else:
                     self.create_token(TokenType.STAR, "*", TokenType.OPERAND)
             
             case "!":
                 if self.match("=") is True:
-                    self.create_token(TokenType.BANG_EQUALS, "!=", TokenType.OPERAND)
+                    self.create_token(TokenType.BANG_EQUALS, None, TokenType.OPERAND)
                 else:
-                    self.create_token(TokenType.CALL_VAR, "!", TokenType.OPERAND)
+                    self.create_token(TokenType.CALL_VAR, None, TokenType.OPERAND)
 
             case "=":
                 if self.match("=") is True:
@@ -120,6 +125,8 @@ class Lexer:
             case "<":
                 if self.match("=") is True:
                     self.create_token(TokenType.LT_EQUALS, "<=", TokenType.OPERAND)
+                elif self.match("|"):
+                    self.create_token(TokenType.L_BIND, None, TokenType.OPERAND)
                 else:
                     self.create_token(TokenType.LT, "<", TokenType.OPERAND)
 
@@ -138,6 +145,9 @@ class Lexer:
                 else:
                     self.create_token(TokenType.SLASH, "/", TokenType.OPERAND)
 
+            case "&":
+                self.create_token(TokenType.ADDRESS, None, TokenType.OPERAND)
+
             case '"':
                 self.string()
 
@@ -153,6 +163,7 @@ class Lexer:
             case "\n":
                 self.line += 1
                 self.line_index = 0
+                self.create_token(TokenType.NEWLINE, "", TokenType.OPERAND)
 
             case _:
                 if self.is_digit(self.character):
@@ -223,6 +234,9 @@ class Lexer:
 
             case "end":
                 self.create_token(TokenType.END, self.text, TokenType.INTRINSIC)
+
+            case "impl":
+                self.create_token(TokenType.IMPL, self.text, TokenType.INTRINSIC)
 
             case "proc":
                 self.create_token(TokenType.PROC, self.text, TokenType.INTRINSIC)
@@ -298,6 +312,10 @@ class Lexer:
         self.advance()
 
         text: str = self.source[self.start + 1 : self.current_index - 1]
+        if "\\n" in text:
+            print("guh")
+        text.replace("\\n", "\n")
+        text.replace("\\0", "\0")
         self.line_index += 1 # accounting for ending quotation
         self.create_token(TokenType.PUSH, text, TokenType.STRING)
             
